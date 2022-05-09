@@ -1,0 +1,39 @@
+version: '3.4'
+
+services:
+  # POSTGRES
+  pg-01:
+    image: postgres:11.15
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      # - ./docker/01/pg-data:/var/lib/postgresql/data
+      - ./docker/01/init-user-db.sh:/docker-entrypoint-initdb.d/init-user-db.sh
+    ports:
+      - 5432:5432
+  pg-02:
+    image: postgres:11.15
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      # - ./docker/01/pg-data:/var/lib/postgresql/data
+      - ./docker/02/init-user-db.sh:/docker-entrypoint-initdb.d/init-user-db.sh
+    ports:
+      - 5433:5432
+  # CRDB
+  crdb-01:
+    image: cockroachdb/cockroach:v20.1.0
+    command: ["start", "--insecure"]
+    ports:
+      - 26257:26257
+      - 8080:8080
+  crdb-01-create:
+    image: cockroachdb/cockroach:v20.1.0
+    depends_on: 
+    - crdb-01
+    command: ["sql", "--insecure", "--host=crdb-01", "--execute", "CREATE DATABASE IF NOT EXISTS \"crdb_01\";  "]
+
